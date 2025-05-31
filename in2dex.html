@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>위버스 선착순 신청 연습</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    #currentTime {
+      font-size: 3em;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .milliseconds {
+      color: #d32f2f;
+      font-size: 1.2em;
+    }
+    button {
+      font-size: 1.5em;
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #555;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-top: 20px;
+      display: none;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #completeScreen {
+      display: none;
+      font-size: 1.4em;
+      margin-top: 20px;
+      color: #333;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="currentTime">--:--:--.<span class="milliseconds">---</span></div>
+  <button id="submitBtn" onclick="submitApplication()">📝 신청</button>
+  <div class="spinner" id="spinner"></div>
+  <div id="completeScreen"></div>
+
+  <script>
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('ko-KR', { hour12: false });
+      const ms = now.getMilliseconds().toString().padStart(3, '0');
+      document.getElementById('currentTime').innerHTML = timeStr + '.<span class="milliseconds">' + ms + '</span>';
+    }
+    setInterval(updateTime, 10);
+
+    function getTimeInMS(date) {
+      return date.getSeconds() * 1000 + date.getMilliseconds();
+    }
+
+    function submitApplication() {
+      const button = document.getElementById('submitBtn');
+      const spinner = document.getElementById('spinner');
+      const complete = document.getElementById('completeScreen');
+
+      button.disabled = true;
+      spinner.style.display = 'block';
+
+      const now = new Date();
+      const myTime = getTimeInMS(now);
+
+      const delay = Math.floor(Math.random() * 1000) + 500;
+
+      setTimeout(() => {
+        spinner.style.display = 'none';
+
+        const base = 60 * 1000;
+        const others = Array.from({length: 20000}, () => base + Math.floor(Math.random() * 3000) - 1000);
+        others.push(myTime);
+        others.sort((a, b) => a - b);
+        const rank = others.indexOf(myTime) + 1;
+
+        complete.style.display = 'block';
+        complete.innerHTML = `✅ 신청 완료!<br>📊 당신의 예상 순위: <strong>${rank}</strong> / 20,001명`;
+        button.disabled = false;
+      }, delay);
+    }
+  </script>
+</body>
+</html>
