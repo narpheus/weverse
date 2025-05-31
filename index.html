@@ -68,7 +68,7 @@
   <div id="completeScreen"></div>
 
   <script>
-    // 기준 시작 시간을 59분 55초 0밀리초로 변경
+    // 기준 시작 시간을 59분 55초 0밀리초로 설정
     let baseTime = new Date();
     baseTime.setMinutes(59);
     baseTime.setSeconds(55);
@@ -86,8 +86,8 @@
     setInterval(updateTime, 10);
 
     const competitorCount = 20000;
-    const competitorStartOffset = 4000;  // 59:59:00 기준으로 상대시간(ms) (즉, 59:55:00 부터 0ms 기준)
-    const competitorEndOffset = 5500;    // 60:00:500까지
+    const competitorStartOffset = 4000; // 59:59.000 기준
+    const competitorEndOffset = 5500;   // 60:00.500 기준
 
     function generateCompetitorTimes() {
       let arr = [];
@@ -128,10 +128,10 @@
       spinner.style.display = 'block';
       complete.style.display = 'none';
 
-      // 현재 기준시간 (59:55:00) 기준 내 누른 시간(ms)
+      // 기준 시간(59:55:00)부터 얼마나 지났는지 계산
       const elapsed = baseTime.getTime() - (() => {
         let d = new Date(baseTime);
-        d.setMinutes(59,55,0);
+        d.setMinutes(59, 55, 0);
         return d.getTime();
       })();
 
@@ -141,32 +141,24 @@
       const userFinishTime = elapsed + loadingDelay;
       const competitorFinishTimes = competitorTimes.map(t => t + loadingDelay);
 
-      // 무효 기준: 60분 00초 000ms = 5000ms (59:55:00부터)
-      const invalidTimeThreshold = 5000;
+      const invalidTimeThreshold = 5000; // 60:00.000은 59:55:000 기준으로 5000ms
 
       setTimeout(() => {
         spinner.style.display = 'none';
 
-        if(userFinishTime < invalidTimeThreshold){
-          // 무효
-          complete.style.display = 'block';
-          complete.innerText = 
-            `❌ 신청 무효 처리됨\n` +
-            `최종 신청 완료 시간이 60분 00초 이전입니다.\n` +
-            `내 최종 신청 완료 시간: ${formatMsToTime(userFinishTime)}`;
-        } else {
-          // 유효 시 순위 계산
-          const rank = competitorFinishTimes.filter(t => t < userFinishTime).length + 1;
+        const myTimeStr = formatMsToTime(elapsed);
+        const finishStr = formatMsToTime(userFinishTime);
+        let result = `🕒 내가 누른 시간: ${myTimeStr}\n⏳ 로딩 시간: ${loadingDelay} ms\n🏁 최종 신청 완료 시간: ${finishStr}\n`;
 
-          complete.style.display = 'block';
-          complete.innerText = 
-            `✅ 신청 완료!\n` +
-            `🕒 내가 누른 시간: ${formatMsToTime(elapsed)}\n` +
-            `⏳ 로딩 시간: ${loadingDelay} ms\n` +
-            `🏁 최종 신청 완료 시간: ${formatMsToTime(userFinishTime)}\n` +
-            `📊 예상 순위: ${rank} / ${competitorCount + 1}명`;
+        if(userFinishTime < invalidTimeThreshold){
+          result = `❌ 신청 무효 처리됨 (60:00.000 이전 도달)\n` + result;
+        } else {
+          const rank = competitorFinishTimes.filter(t => t < userFinishTime).length + 1;
+          result += `📊 예상 순위: ${rank} / ${competitorCount + 1}명`;
         }
 
+        complete.innerText = result;
+        complete.style.display = 'block';
         button.disabled = false;
       }, loadingDelay);
     }
