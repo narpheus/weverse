@@ -18,7 +18,7 @@
     #currentTime {
       font-size: 3em;
       font-weight: bold;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
     .milliseconds {
       color: #d32f2f;
@@ -30,7 +30,7 @@
       background-color: #4CAF50;
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
     }
     button:hover {
@@ -52,17 +52,25 @@
     }
     #completeScreen {
       display: none;
-      font-size: 1.4em;
-      margin-top: 20px;
+      font-size: 1.3em;
+      margin-top: 30px;
       color: #333;
       text-align: center;
+      line-height: 1.5em;
       white-space: pre-line;
     }
-    #resetBtn {
+    #retryBtn {
       margin-top: 20px;
+      padding: 12px 24px;
       font-size: 1.2em;
-      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
       border-radius: 8px;
+      cursor: pointer;
+    }
+    #retryBtn:hover {
+      background-color: #1976D2;
     }
   </style>
 </head>
@@ -73,90 +81,103 @@
   <div id="completeScreen"></div>
 
   <script>
-    const SIM_START = new Date();
-    SIM_START.setMinutes(59);
-    SIM_START.setSeconds(55);
-    SIM_START.setMilliseconds(0);
+    // 기준 시간: 59분 55초
+    let baseTime = new Date();
+    baseTime.setMinutes(59);
+    baseTime.setSeconds(55);
+    baseTime.setMilliseconds(0);
 
-    let interval = setInterval(updateTime, 10);
-
+    // 실시간 시계
     function updateTime() {
-      const now = new Date();
-      const msPassed = now - SIM_START;
-      const simDate = new Date(SIM_START.getTime() + msPassed);
-      const timeStr = simDate.toLocaleTimeString('ko-KR', { hour12: false });
-      const ms = simDate.getMilliseconds().toString().padStart(3, '0');
-      document.getElementById('currentTime').innerHTML = `${timeStr}.<span class="milliseconds">${ms}</span>`;
+      const h = baseTime.getHours().toString().padStart(2, '0');
+      const m = baseTime.getMinutes().toString().padStart(2, '0');
+      const s = baseTime.getSeconds().toString().padStart(2, '0');
+      const ms = baseTime.getMilliseconds().toString().padStart(3, '0');
+      document.getElementById('currentTime').innerHTML = `${h}:${m}:${s}.<span class="milliseconds">${ms}</span>`;
+      baseTime = new Date(baseTime.getTime() + 10);
     }
+    setInterval(updateTime, 10);
 
-    function getElapsedMS() {
-      return new Date() - SIM_START;
-    }
+    const competitorCount = 20000;
+    const competitorStartOffset = 4500;   // 59:59.500 이후부터
+    const competitorEndOffset = 1000;     // 59:59.500 ~ 60:00.500 (1초 범위)
 
-    function formatMS(ms) {
-      const totalSec = Math.floor(ms / 1000);
-      const min = Math.floor(totalSec / 60).toString().padStart(2, '0');
-      const sec = (totalSec % 60).toString().padStart(2, '0');
-      const milli = (ms % 1000).toString().padStart(3, '0');
-      return `${min}:${sec}.${milli}`;
-    }
-
-    function generateCompetitorTimes(count, baseStart, baseEnd) {
-      const times = [];
-      for (let i = 0; i < count; i++) {
-        const click = baseStart + Math.random() * (baseEnd - baseStart);
-        times.push(click);
+    function generateCompetitorTimes() {
+      let arr = [];
+      for (let i = 0; i < competitorCount; i++) {
+        arr.push(competitorStartOffset + Math.floor(Math.random() * competitorEndOffset));
       }
-      return times;
+      return arr.sort((a, b) => a - b);
+    }
+
+    function formatMsToTime(ms) {
+      let totalMs = ms;
+      let h = 0, m = 59, s = 55;
+      let msLeft = totalMs;
+
+      s += Math.floor(msLeft / 1000);
+      msLeft = msLeft % 1000;
+
+      m += Math.floor(s / 60);
+      s = s % 60;
+
+      h += Math.floor(m / 60);
+      m = m % 60;
+
+      return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${msLeft.toString().padStart(3,'0')}`;
     }
 
     function submitApplication() {
       const button = document.getElementById('submitBtn');
       const spinner = document.getElementById('spinner');
       const complete = document.getElementById('completeScreen');
-      complete.style.display = 'none';
-      complete.innerText = '';
+
       button.disabled = true;
       spinner.style.display = 'block';
+      complete.style.display = 'none';
+      complete.innerHTML = '';
 
-      const clickTime = getElapsedMS();
+      const elapsed = baseTime.getTime() - (() => {
+        let d = new Date(baseTime);
+        d.setMinutes(59, 55, 0);
+        return d.getTime();
+      })();
+
       const loadingDelay = Math.floor(Math.random() * 1000) + 500;
+      const userFinishTime = elapsed + loadingDelay;
+
+      const competitorTimes = generateCompetitorTimes().map(t => t + loadingDelay);
 
       setTimeout(() => {
         spinner.style.display = 'none';
 
-        const finishTime = clickTime + loadingDelay;
+        const myTimeStr = formatMsToTime(elapsed);
+        const finishStr = formatMsToTime(userFinishTime);
 
-        const minValid = 60 * 1000;
-        const maxValid = 70 * 1000;
+        const thresholdStart = 5000; // 60분 00초
+        const thresholdEnd = 600000; // 70분 00초
 
-        let message = `🕓 신청 버튼 클릭 시각: ${formatMS(clickTime)}\n` +
-                      `⏳ 로딩 시간: ${loadingDelay}ms\n` +
-                      `✅ 신청 완료 시각: ${formatMS(finishTime)}\n\n`;
+        let result = `🕒 내가 누른 시간: ${myTimeStr}\n⏳ 로딩 시간: ${loadingDelay} ms\n🏁 신청 완료 시간: ${finishStr}\n`;
 
-        if (finishTime < minValid) {
-          message += `⛔ 신청이 너무 빠릅니다! 유효 신청 시간은 60:00.000 ~ 70:00.000입니다.`;
-        } else if (finishTime >= maxValid) {
-          message += `❌ 신청이 너무 늦었습니다. 다음 라운드를 기다려주세요.`;
+        if (userFinishTime < thresholdStart) {
+          result = `❌ 신청 무효 (60분 전 신청)\n` + result;
+        } else if (userFinishTime >= thresholdEnd) {
+          result = `⛔ 신청 가능한 시간이 아닙니다.\n(60:00.000 ~ 70:00.000 사이에만 유효)\n` + result;
         } else {
-          const competitors = generateCompetitorTimes(20000, 59 * 1000, 60 * 1000 + 500);
-          const allTimes = competitors.map(t => t + loadingDelay);
-          allTimes.push(finishTime);
-          allTimes.sort((a, b) => a - b);
-          const rank = allTimes.indexOf(finishTime) + 1;
-          message += `🎉 신청 성공!\n📊 예상 순위: ${rank} / ${allTimes.length}`;
+          const rank = competitorTimes.filter(t => t < userFinishTime).length + 1;
+          result += `📊 예상 순위: ${rank} / ${competitorCount + 1}명`;
         }
 
-        complete.innerText = message;
+        complete.innerText = result;
+
+        const retryBtn = document.createElement('button');
+        retryBtn.id = 'retryBtn';
+        retryBtn.textContent = '🔁 다시 시도하기';
+        retryBtn.onclick = () => location.reload();
+        complete.appendChild(document.createElement('br'));
+        complete.appendChild(retryBtn);
+
         complete.style.display = 'block';
-
-        // 다시 하기 버튼 생성
-        const resetBtn = document.createElement('button');
-        resetBtn.id = 'resetBtn';
-        resetBtn.textContent = '🔄 다시 하기';
-        resetBtn.onclick = () => location.reload();
-        complete.appendChild(resetBtn);
-
         button.disabled = false;
       }, loadingDelay);
     }
