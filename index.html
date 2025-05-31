@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="ko"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;위버스 선착순 신청 연습&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-family: 'Arial', sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>flex-direction: column;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>height: 100vh;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #f4f4f4;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>#currentTime {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 3em;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.milliseconds {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #d32f2f;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.2em;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>button {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.5em;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 12px 24px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background-color: #4CAF50;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>button:hover {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background-color: #45a049;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.spinner {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 6px solid #f3f3f3;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-top: 6px solid #555;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 40px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>height: 40px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>animation: spin 1s linear infinite;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@keyframes spin {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>0% { transform: rotate(0deg); }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>100% { transform: rotate(360deg); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>#completeScreen {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.4em;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #333;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="currentTime"&gt;--:--:--.&lt;span class="milliseconds"&gt;---&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button id="submitBtn" onclick="submitApplication()"&gt;📝 신청&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="spinner" id="spinner"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="completeScreen"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function updateTime() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const now = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const timeStr = now.toLocaleTimeString('ko-KR', { hour12: false });</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ms = now.getMilliseconds().toString().padStart(3, '0');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('currentTime').innerHTML = timeStr + '.&lt;span class="milliseconds"&gt;' + ms + '&lt;/span&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setInterval(updateTime, 10);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function getTimeInMS(date) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return date.getSeconds() * 1000 + date.getMilliseconds();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function submitApplication() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const button = document.getElementById('submitBtn');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const spinner = document.getElementById('spinner');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const complete = document.getElementById('completeScreen');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>button.disabled = true;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>spinner.style.display = 'block';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const now = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const myTime = getTimeInMS(now);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const delay = Math.floor(Math.random() * 1000) + 500;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>spinner.style.display = 'none';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const base = 60 * 1000;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const others = Array.from({length: 20000}, () =&gt; base + Math.floor(Math.random() * 3000) - 1000);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>others.push(myTime);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>others.sort((a, b) =&gt; a - b);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const rank = others.indexOf(myTime) + 1;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>complete.style.display = 'block';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>complete.innerHTML = `✅ 신청 완료!&lt;br&gt;📊 당신의 예상 순위: &lt;strong&gt;${rank}&lt;/strong&gt; / 20,001명`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>button.disabled = false;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}, delay);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
