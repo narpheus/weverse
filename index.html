@@ -66,10 +66,10 @@
   <div id="completeScreen"></div>
 
   <script>
-    // baseTime을 항상 59분 59초 000ms로 세팅
+    // baseTime을 항상 59분 50초 000ms로 세팅
     let baseTime = new Date();
     baseTime.setMinutes(59);
-    baseTime.setSeconds(59);
+    baseTime.setSeconds(50);
     baseTime.setMilliseconds(0);
 
     // 10ms마다 10ms씩 더해 시간 업데이트
@@ -84,8 +84,7 @@
     }
     setInterval(updateTime, 10);
 
-    // 신청 완료 순서 카운트용 변수 (00:00:00 도달 순서대로)
-    let finishOrder = [];
+    // 신청 완료 순서 카운트용 변수 (순서대로 1등, 2등, 3등...)
     let rankCount = 0;
 
     function submitApplication() {
@@ -103,31 +102,7 @@
       setTimeout(() => {
         spinner.style.display = 'none';
 
-        // 현재 baseTime 기준 신청 완료 시간 계산
-        const completeTime = new Date(baseTime.getTime());
-
-        // 신청 완료 시간을 다음 시각 00분 00초까지 남은 시간으로 환산
-        // 00분 00초는 다음 시간의 정각으로 계산
-        const nextHour = new Date(completeTime);
-        nextHour.setHours(completeTime.getHours() + 1);
-        nextHour.setMinutes(0);
-        nextHour.setSeconds(0);
-        nextHour.setMilliseconds(0);
-
-        // 00:00:00까지 남은 ms
-        const msToNextHour = nextHour.getTime() - completeTime.getTime();
-
-        // finishOrder 배열에 msToNextHour 넣고 정렬해서 순위 계산
-        finishOrder.push(msToNextHour);
-        finishOrder.sort((a,b) => a - b);
-        rankCount = finishOrder.indexOf(msToNextHour) + 1;
+        rankCount++;  // 완료 순서대로 1씩 증가
 
         complete.style.display = 'block';
-        complete.innerHTML = `✅ 신청 완료!<br>🕒 로딩 시간: <strong>${delay} ms</strong><br>📊 당신의 예상 순위: <strong>${rankCount}</strong> / 20,001명`;
-
-        button.disabled = false;
-      }, delay);
-    }
-  </script>
-</body>
-</html>
+        complete.innerHTML = `✅ 신청 완료!<br>🕒 로딩 시간: <strong>${delay} ms</strong><br>📊 당신의 예상 순위: <strong>${rankCo
