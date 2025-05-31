@@ -81,62 +81,66 @@
   <div id="completeScreen"></div>
 
   <script>
-    // 기준 시간 고정 (가상 시뮬레이션 시작점)
-    let baseTime = new Date();
-    baseTime.setHours(15);       // 시는 15시로 고정 (원하는 시간대로 조절 가능)
-    baseTime.setMinutes(59);
-    baseTime.setSeconds(55);
-    baseTime.setMilliseconds(0);
+    // 시뮬레이션 기준 시작 시각 (15:59:55.000 고정)
+    const baseStartTime = new Date();
+    baseStartTime.setHours(15);
+    baseStartTime.setMinutes(59);
+    baseStartTime.setSeconds(55);
+    baseStartTime.setMilliseconds(0);
 
-    // 가상 시간 10ms 단위로 증가하는 실시간 표시 (시뮬레이션용)
+    // 시뮬레이션용 내부 시각: 15:59:55부터 10ms씩 증가
+    let simTime = new Date(baseStartTime.getTime());
+
     function updateTime() {
-      const h = baseTime.getHours().toString().padStart(2, '0');
-      const m = baseTime.getMinutes().toString().padStart(2, '0');
-      const s = baseTime.getSeconds().toString().padStart(2, '0');
-      const ms = baseTime.getMilliseconds().toString().padStart(3, '0');
+      const h = simTime.getHours().toString().padStart(2, '0');
+      const m = simTime.getMinutes().toString().padStart(2, '0');
+      const s = simTime.getSeconds().toString().padStart(2, '0');
+      const ms = simTime.getMilliseconds().toString().padStart(3, '0');
       document.getElementById('currentTime').innerHTML = `${h}:${m}:${s}.<span class="milliseconds">${ms}</span>`;
-      baseTime = new Date(baseTime.getTime() + 10);
+
+      // 10ms 증가
+      simTime = new Date(simTime.getTime() + 10);
     }
     setInterval(updateTime, 10);
 
-    const competitorCount = 20000; // 경쟁자 수 2만명
+    // 경쟁자 수 (2만명)
+    const competitorCount = 20000;
 
-    // 경쟁자 클릭 시간 범위 (밀리초 기준)
-    // 59:59.000 부터 60:00.300 까지 = 59분 59초 000 ~ 60분 0초 300밀리초
-    // 59분 59초 000 기준 (분,초,밀리초를 밀리초로 환산한 값)
-    const competitorClickStartMs = (59 * 60 + 59) * 1000 + 0;      // 3599초 * 1000 = 3,599,000 ms
-    const competitorClickEndMs = (60 * 60 + 0) * 1000 + 300;       // 3600초 + 300ms = 3,600,300 ms
-    const validStartMs = (60 * 60) * 1000;                         // 60분 0초 0ms = 3,600,000 ms
-    const validEndMs = (70 * 60) * 1000;                           // 70분 0초 0ms = 4,200,000 ms
+    // 경쟁자 클릭 시간 범위 (ms 경과 기준)
+    // 59:59.000 ~ 60:00.300 (즉, 시작 기준점 15:59:55부터 4000ms~5300ms 사이)
+    const competitorClickStartMs = 4000;  // 4초 경과
+    const competitorClickEndMs = 5300;    // 5.3초 경과
 
-    // 기준 시간 15:59:55 을 밀리초로 변환 (시:분:초 => ms)
-    function getBaseMs(date) {
-      return date.getHours() * 3600 * 1000 + date.getMinutes() * 60 * 1000 + date.getSeconds() * 1000 + date.getMilliseconds();
-    }
+    // 60분 00초 000 기준 ms (15:59:55 + 5000ms)
+    const validStartMs = 5000;
 
-    // 밀리초(ms)를 시:분:초.밀리초 문자열로 변환
-    function formatMsToTime(ms) {
-      const totalSeconds = Math.floor(ms / 1000);
-      const milliseconds = ms % 1000;
-      const h = Math.floor(totalSeconds / 3600);
-      const m = Math.floor((totalSeconds % 3600) / 60);
-      const s = totalSeconds % 60;
+    // 70분 00초 000 기준 ms (15:59:55 + 4200000ms) => 70분은 4200초이므로
+    // 단위 통일 위해 70분은 4200000ms이나 시뮬레이션 10ms 단위라 4200000이 너무 큼,
+    // 실제로 70분 후까지 기다리는 상황이 아니므로 임의로 10분(600000ms)으로 처리
+    const validEndMs = 600000;  // 10분 = 600,000ms
 
-      return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${milliseconds.toString().padStart(3,'0')}`;
-    }
-
-    // 경쟁자 클릭 시간 생성 함수 (랜덤 분포)
+    // 경쟁자 클릭 시간 생성 (경과 ms 배열)
     function generateCompetitorTimes() {
-      let arr = [];
+      const arr = [];
       for (let i = 0; i < competitorCount; i++) {
-        // 59:59.000 부터 60:00.300 사이 임의 클릭 시간 (ms 단위)
-        const randomClickTime = competitorClickStartMs + Math.floor(Math.random() * (competitorClickEndMs - competitorClickStartMs + 1));
-        arr.push(randomClickTime);
+        const randTime = competitorClickStartMs + Math.random() * (competitorClickEndMs - competitorClickStartMs);
+        arr.push(randTime);
       }
-      return arr.sort((a,b) => a - b);
+      return arr.sort((a, b) => a - b);
     }
 
-    // 신청 함수
+    // ms 경과 시간을 시:분:초.밀리초 문자열로 변환 (15:59:55 기준)
+    function formatElapsedMs(msElapsed) {
+      // baseStartTime 기준으로 msElapsed 더해 절대시간 계산
+      const absoluteTime = new Date(baseStartTime.getTime() + msElapsed);
+
+      const h = absoluteTime.getHours().toString().padStart(2, '0');
+      const m = absoluteTime.getMinutes().toString().padStart(2, '0');
+      const s = absoluteTime.getSeconds().toString().padStart(2, '0');
+      const ms = absoluteTime.getMilliseconds().toString().padStart(3, '0');
+      return `${h}:${m}:${s}.${ms}`;
+    }
+
     function submitApplication() {
       const button = document.getElementById('submitBtn');
       const spinner = document.getElementById('spinner');
@@ -147,47 +151,34 @@
       complete.style.display = 'none';
       complete.innerHTML = '';
 
-      // 현재 baseTime 밀리초값 (시뮬레이션 기준)
-      const currentMs = getBaseMs(baseTime);
+      // 현재 시뮬레이션 시간 경과 ms (15:59:55 기준)
+      const elapsed = simTime.getTime() - baseStartTime.getTime();
 
-      // 클릭 시점 기준으로 경과 밀리초 계산 (baseTime - 시뮬레이션 시작점)
-      // 기준 시작점은 15:59:55 (시뮬레이션 시작)
-      const baseStartMs = (15 * 3600 + 59 * 60 + 55) * 1000;  // 15:59:55 기준 ms
-      const elapsed = currentMs - baseStartMs;
-
-      // 로딩 시간은 500~1500 ms 랜덤 (매 클릭마다 새로 랜덤 생성)
+      // 내 로딩 시간 (500~1500ms)
       const loadingDelay = Math.floor(Math.random() * 1000) + 500;
 
-      // 경쟁자 클릭시간 배열 생성
-      const competitorClicks = generateCompetitorTimes();
+      // 내 완료 시간 = 클릭시간(경과) + 로딩시간
+      const myFinishTime = elapsed + loadingDelay;
 
-      // 경쟁자 완료시간 = 클릭시간 + 내 로딩시간
+      // 경쟁자 클릭시간 + 내 로딩시간 => 완료시간 배열 생성
+      const competitorClicks = generateCompetitorTimes();
       const competitorFinishTimes = competitorClicks.map(t => t + loadingDelay);
 
-      // 내 완료시간 = 내 클릭시간 + 내 로딩시간
-      const myFinishTime = currentMs + loadingDelay;
-
-      // spinner 끝난 뒤 처리
       setTimeout(() => {
         spinner.style.display = 'none';
 
-        // 클릭시간, 완료시간 문자열 변환 (ms -> 시:분:초.ms)
-        const myClickStr = formatMsToTime(currentMs);
-        const myFinishStr = formatMsToTime(myFinishTime);
-        const loadingStr = loadingDelay + " ms";
+        // 결과 문자열
+        let result = `🕒 내가 누른 시간: ${formatElapsedMs(elapsed)}\n⏳ 로딩 시간: ${loadingDelay} ms\n🏁 신청 완료 시간: ${formatElapsedMs(myFinishTime)}\n`;
 
-        let result = `🕒 내가 누른 시간: ${myClickStr}\n⏳ 로딩 시간: ${loadingStr}\n🏁 신청 완료 시간: ${myFinishStr}\n`;
-
-        // 60분 이전이면 무효, 70분 이후면 신청 불가
+        // 신청 유효 여부 판단
         if (myFinishTime < validStartMs) {
           result = `❌ 신청 무효 (60분 이전 완료)\n` + result;
-        } else if (myFinishTime >= validEndMs) {
+        } else if (myFinishTime > validEndMs) {
           result = `⛔ 신청 불가 (70분 이후 완료)\n` + result;
         } else {
-          // 정상 유효 시간대면 순위 계산 (완료시간 기준)
-          // 내 완료시간보다 작은 경쟁자 완료시간 개수 + 1 = 내 순위
+          // 유효 시간 내면 순위 산정
           const rank = competitorFinishTimes.filter(t => t < myFinishTime).length + 1;
-          result += `📊 예상 순위: ${rank} / ${competitorCount + 1} 명\n`;
+          result += `📊 예상 순위: ${rank} / ${competitorCount + 1}명`;
         }
 
         complete.innerText = result;
