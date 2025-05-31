@@ -66,17 +66,27 @@
   <div id="completeScreen"></div>
 
   <script>
+    // baseTime을 항상 59분 59초 000ms로 세팅
+    let baseTime = new Date();
+    baseTime.setMinutes(59);
+    baseTime.setSeconds(59);
+    baseTime.setMilliseconds(0);
+
+    // 10ms마다 10ms씩 더해 시간 업데이트
     function updateTime() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('ko-KR', { hour12: false });
-      const ms = now.getMilliseconds().toString().padStart(3, '0');
-      document.getElementById('currentTime').innerHTML = timeStr + '.<span class="milliseconds">' + ms + '</span>';
+      const h = baseTime.getHours().toString().padStart(2, '0');
+      const m = baseTime.getMinutes().toString().padStart(2, '0');
+      const s = baseTime.getSeconds().toString().padStart(2, '0');
+      const ms = baseTime.getMilliseconds().toString().padStart(3, '0');
+      document.getElementById('currentTime').innerHTML = `${h}:${m}:${s}.<span class="milliseconds">${ms}</span>`;
+      
+      baseTime = new Date(baseTime.getTime() + 10);
     }
     setInterval(updateTime, 10);
 
-    function getTimeInMS(date) {
-      return date.getSeconds() * 1000 + date.getMilliseconds();
-    }
+    // 신청 완료 순서 카운트용 변수 (00:00:00 도달 순서대로)
+    let finishOrder = [];
+    let rankCount = 0;
 
     function submitApplication() {
       const button = document.getElementById('submitBtn');
@@ -85,23 +95,36 @@
 
       button.disabled = true;
       spinner.style.display = 'block';
+      complete.style.display = 'none';
 
-      const now = new Date();
-      const myTime = getTimeInMS(now);
-
+      // 랜덤 로딩 시간 500~1500ms (0.5~1.5초)
       const delay = Math.floor(Math.random() * 1000) + 500;
 
       setTimeout(() => {
         spinner.style.display = 'none';
 
-        const base = 60 * 1000;
-        const others = Array.from({length: 20000}, () => base + Math.floor(Math.random() * 3000) - 1000);
-        others.push(myTime);
-        others.sort((a, b) => a - b);
-        const rank = others.indexOf(myTime) + 1;
+        // 현재 baseTime 기준 신청 완료 시간 계산
+        const completeTime = new Date(baseTime.getTime());
+
+        // 신청 완료 시간을 다음 시각 00분 00초까지 남은 시간으로 환산
+        // 00분 00초는 다음 시간의 정각으로 계산
+        const nextHour = new Date(completeTime);
+        nextHour.setHours(completeTime.getHours() + 1);
+        nextHour.setMinutes(0);
+        nextHour.setSeconds(0);
+        nextHour.setMilliseconds(0);
+
+        // 00:00:00까지 남은 ms
+        const msToNextHour = nextHour.getTime() - completeTime.getTime();
+
+        // finishOrder 배열에 msToNextHour 넣고 정렬해서 순위 계산
+        finishOrder.push(msToNextHour);
+        finishOrder.sort((a,b) => a - b);
+        rankCount = finishOrder.indexOf(msToNextHour) + 1;
 
         complete.style.display = 'block';
-        complete.innerHTML = `✅ 신청 완료!<br>📊 당신의 예상 순위: <strong>${rank}</strong> / 20,001명`;
+        complete.innerHTML = `✅ 신청 완료!<br>🕒 로딩 시간: <strong>${delay} ms</strong><br>📊 당신의 예상 순위: <strong>${rankCount}</strong> / 20,001명`;
+
         button.disabled = false;
       }, delay);
     }
