@@ -105,4 +105,11 @@
         rankCount++;  // 완료 순서대로 1씩 증가
 
         complete.style.display = 'block';
-        complete.innerHTML = `✅ 신청 완료!<br>🕒 로딩 시간: <strong>${delay} ms</strong><br>📊 당신의 예상 순위: <strong>${rankCo
+        complete.innerHTML = `✅ 신청 완료!<br>🕒 로딩 시간: <strong>${delay} ms</strong><br>📊 당신의 예상 순위: <strong>${rankCount}</strong> / 20,001명`;
+
+        button.disabled = false;
+      }, delay);
+    }
+  </script>
+</body>
+</html>
