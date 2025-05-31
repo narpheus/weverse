@@ -68,10 +68,10 @@
   <div id="completeScreen"></div>
 
   <script>
-    // 59분 50초 000ms부터 시작하는 기준 시간
+    // 기준 시작 시간을 59분 55초 0밀리초로 변경
     let baseTime = new Date();
     baseTime.setMinutes(59);
-    baseTime.setSeconds(50);
+    baseTime.setSeconds(55);
     baseTime.setMilliseconds(0);
 
     function updateTime() {
@@ -85,21 +85,10 @@
     }
     setInterval(updateTime, 10);
 
-    // 경쟁자 버튼 누르는 시간 범위
-    // 59분 59초 000ms (599000ms from 59:50:00) ~ 60분 00.5초 (600500ms from 59:50:00)
     const competitorCount = 20000;
-    const competitorStartMs = 59000 + 9000; // 59:50 + 9초 = 59:59 = 59000 + 9000 = 68000 ??? -> 다시 계산 필요
+    const competitorStartOffset = 4000;  // 59:59:00 기준으로 상대시간(ms) (즉, 59:55:00 부터 0ms 기준)
+    const competitorEndOffset = 5500;    // 60:00:500까지
 
-    // 다시 정확하게 계산
-    // 기준 시점 = 59:50:00 = 0ms
-    // 59:59:00 = 9초 후 = 9000ms
-    // 60:00:500 = 10초 500ms 후 = 10500ms
-
-    // 정리:
-    const competitorStartOffset = 9000;  // 59:59:00까지 ms from 기준시간
-    const competitorEndOffset = 10500;   // 60:00:500까지 ms from 기준시간
-
-    // 경재자 버튼 누르는 시간 생성 함수 (랜덤 ms)
     function generateCompetitorTimes() {
       let arr = [];
       for(let i=0; i<competitorCount; i++){
@@ -108,12 +97,11 @@
       return arr.sort((a,b) => a-b);
     }
 
-    // ms를 시:분:초.밀리초로 포맷팅 (기준 59:50:00 부터)
     function formatMsToTime(ms) {
       let totalMs = ms;
       let h = 0;
       let m = 59;
-      let s = 50;
+      let s = 55;
       let msLeft = totalMs;
 
       s += Math.floor(msLeft / 1000);
@@ -128,8 +116,8 @@
       return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${msLeft.toString().padStart(3,'0')}`;
     }
 
-    let competitorTimes = [];  // 경쟁자 누른 시간 배열
-    let loadingDelay = 0;      // 로딩 시간 (모든 사람 동일)
+    let competitorTimes = [];
+    let loadingDelay = 0;
 
     function submitApplication() {
       const button = document.getElementById('submitBtn');
@@ -140,39 +128,45 @@
       spinner.style.display = 'block';
       complete.style.display = 'none';
 
-      // 내가 누른 시간 (기준시간 59:50:00부터 흐른 ms)
+      // 현재 기준시간 (59:55:00) 기준 내 누른 시간(ms)
       const elapsed = baseTime.getTime() - (() => {
         let d = new Date(baseTime);
-        d.setMinutes(59,50,0);
+        d.setMinutes(59,55,0);
         return d.getTime();
       })();
 
-      // 경쟁자 시간, 로딩 시간 새로 생성 (한 번에 새로 만드는 게 더 재현 가능)
       competitorTimes = generateCompetitorTimes();
+      loadingDelay = Math.floor(Math.random() * 1000) + 500; // 500~1500ms
 
-      // 모든 사람이 겪는 동일한 로딩 시간 (500~1500ms)
-      loadingDelay = Math.floor(Math.random() * 1000) + 500;
-
-      // 사용자 누른 시간 + 로딩 시간 = 최종 완료 시간
       const userFinishTime = elapsed + loadingDelay;
-
-      // 경쟁자들도 누른 시간 + 동일 로딩 시간으로 최종 완료 시간 산출
       const competitorFinishTimes = competitorTimes.map(t => t + loadingDelay);
 
-      // 순위 계산: 나보다 먼저 끝낸 경쟁자 수 + 1
-      const rank = competitorFinishTimes.filter(t => t < userFinishTime).length + 1;
+      // 무효 기준: 60분 00초 000ms = 5000ms (59:55:00부터)
+      const invalidTimeThreshold = 5000;
 
       setTimeout(() => {
         spinner.style.display = 'none';
 
-        complete.style.display = 'block';
-        complete.innerText = 
-          `✅ 신청 완료!\n` +
-          `🕒 내가 누른 시간: ${formatMsToTime(elapsed)}\n` +
-          `⏳ 로딩 시간: ${loadingDelay} ms\n` +
-          `🏁 최종 신청 완료 시간: ${formatMsToTime(userFinishTime)}\n` +
-          `📊 예상 순위: ${rank} / ${competitorCount + 1}명`;
-        
+        if(userFinishTime < invalidTimeThreshold){
+          // 무효
+          complete.style.display = 'block';
+          complete.innerText = 
+            `❌ 신청 무효 처리됨\n` +
+            `최종 신청 완료 시간이 60분 00초 이전입니다.\n` +
+            `내 최종 신청 완료 시간: ${formatMsToTime(userFinishTime)}`;
+        } else {
+          // 유효 시 순위 계산
+          const rank = competitorFinishTimes.filter(t => t < userFinishTime).length + 1;
+
+          complete.style.display = 'block';
+          complete.innerText = 
+            `✅ 신청 완료!\n` +
+            `🕒 내가 누른 시간: ${formatMsToTime(elapsed)}\n` +
+            `⏳ 로딩 시간: ${loadingDelay} ms\n` +
+            `🏁 최종 신청 완료 시간: ${formatMsToTime(userFinishTime)}\n` +
+            `📊 예상 순위: ${rank} / ${competitorCount + 1}명`;
+        }
+
         button.disabled = false;
       }, loadingDelay);
     }
