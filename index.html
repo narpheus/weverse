@@ -177,7 +177,9 @@
           result = `⛔ 신청 불가 (70분 이후 완료)\n` + result;
         } else {
           // 유효 시간 내면 순위 산정
-          const rank = competitorFinishTimes.filter(t => t < myFinishTime).length + 1;
+          // 유효 시간 내면 순위 산정
+          const rank = competitorFinishTimes.filter(t => t >= validStartMs && t < myFinishTime).length + 1;
+
           result += `📊 예상 순위: ${rank} / ${competitorCount + 1}명`;
         }
 
