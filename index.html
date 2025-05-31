@@ -98,9 +98,9 @@
     }
     setInterval(updateTime, 10);
 
-    const competitorCount = 20000;
-    const competitorStartOffset = 4500;   // 59:59.500 이후부터
-    const competitorEndOffset = 1000;     // 59:59.500 ~ 60:00.500 (1초 범위)
+    const competitorCount = 5000; // 5천명으로 축소
+    const competitorStartOffset = 40000;  // 59:00.000 부터 시작
+    const competitorEndOffset = 1300;     // 최대 1.3초 (즉 59:00.000 ~ 60:00.300)
 
     function generateCompetitorTimes() {
       let arr = [];
